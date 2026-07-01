@@ -13,9 +13,18 @@ const CourseGrid = ({
   onPreview,
   onDelete,
   hasFilters,
+  onClearFilters,
 }) => {
   if (courses.length === 0) {
-    return (
+    return hasFilters ? (
+      <EmptyState
+        icon={MdLibraryBooks}
+        title="No Courses Found"
+        description="No courses match your search or filters. Try adjusting your criteria."
+        buttonText="Clear Filters"
+        onButtonClick={onClearFilters}
+      />
+    ) : (
       <EmptyState
         icon={MdLibraryBooks}
         title="No Courses Found"
