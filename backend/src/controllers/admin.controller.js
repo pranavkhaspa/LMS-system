@@ -175,16 +175,63 @@ exports.getAdminUsers = async (req, res, next) => {
 exports.updateUserStatus = async (req, res, next) => {
   try {
     const { status, role } = req.body;
+
+    if (!status && !role) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide status or role to update.",
+      });
+    }
+
+    const allowedStatuses = ["pending", "approved", "rejected", "suspended"];
+    const allowedRoles = ["user", "instructor", "admin"];
+
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid status.",
+      });
+    }
+
+    if (role && !allowedRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid role.",
+      });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { id: req.params.id },
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found.",
+      });
+    }
+
     const updateData = {};
     if (status) updateData.status = status;
     if (role) updateData.role = role;
 
-    const user = await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: req.params.id },
       data: updateData,
-      select: { id: true, name: true, email: true, role: true, status: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+      },
     });
-    res.status(200).json({ success: true, data: user });
+
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully.",
+      data: updatedUser,
+    });
   } catch (error) {
     next(error);
   }
@@ -195,8 +242,26 @@ exports.updateUserStatus = async (req, res, next) => {
 // @access  Private/Admin
 exports.deleteAdminUser = async (req, res, next) => {
   try {
-    await prisma.user.delete({ where: { id: req.params.id } });
-    res.status(200).json({ success: true, data: {} });
+    const existingUser = await prisma.user.findUnique({
+      where: { id: req.params.id },
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found.",
+      });
+    }
+
+    await prisma.user.delete({
+      where: { id: req.params.id },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "User deleted successfully.",
+      data: {},
+    });
   } catch (error) {
     next(error);
   }
