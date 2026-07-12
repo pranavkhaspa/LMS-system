@@ -120,7 +120,6 @@ const exportReport = async (req, res, next) => {
     }
 
     let csvContent = '';
-    
     // Fetch and process report data based on requested type
     switch (normalizedType) {
       case 'dashboard': {

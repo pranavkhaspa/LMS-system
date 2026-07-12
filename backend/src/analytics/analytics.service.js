@@ -371,10 +371,8 @@ const getUserAnalytics = async (userId) => {
   const coursesEnrolled = userEnrollments.length;
   const coursesCompleted = userEnrollments.filter(e => e.status === 'Completed').length;
   const completionRate = calculateCompletionRate(coursesCompleted, coursesEnrolled);
-  
   const totalMinutes = userEnrollments.reduce((acc, curr) => acc + curr.learningTime, 0);
   const learningHours = parseFloat((totalMinutes / 60).toFixed(2));
-  
   const lessonsCompleted = userEnrollments.reduce((acc, curr) => acc + (curr.completedLessons ? curr.completedLessons.length : 0), 0);
   const currentActiveCourses = userEnrollments.filter(e => e.status === 'In Progress').length;
 
